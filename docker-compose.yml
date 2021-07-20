@@ -1,0 +1,75 @@
+# docker-compose file example for local development.
+# Author: Eduardo A.
+# Date 17/10/2020
+
+version: '2.4'
+
+services:
+  express:
+
+    # Defines the services this one depends on.
+    # To avoid errors during 'compose up', health checks are put in place
+    # to ensure the infrastructure is build in the correct sequence, i.e.
+    # only after the db is ready to receive connections is the express
+    # started.
+    #depends_on: 
+      #db:
+        #condition: service_healthy
+
+    # Build image
+    #build:
+      #context: .
+      #args: ["NODE_ENV=development"]  # To override the settings of Dockerfile
+
+    # To run nodemon instead of node automatically.
+    # Since nodemon was not installed globally, we need to provide the
+    # the full path to nodemon, and the path for the app starter file
+    # 
+    # NOTE: Since the dockerfile adds "/node/node_modules" to the path, 
+    # there is no need to use full paths.
+    command: nodemon /node/app/server/index.js
+
+    # Forwarding traffic between host and container
+    ports:
+      - 3000:3000
+    
+    # Bind-mounting configs
+    # In order to avoid mixing host and node node_modules,
+    # two volumes are defined.
+    volumes:
+      # Binds current folder to the containers folder.
+      - .:/node/app
+
+      # Binds an inexistent host folder to the '/node/app/node_modules'
+      # Since this path will be empty, node will look for those modeules
+      # in the upper level, i.e. '/node/node_modules' which the Docker
+      # file ensures by running the 'npm install' at '/node'.
+      - /node/app/node_modules
+
+    env_file: .env
+
+    # Environment variables
+    #environment:
+      #- DEBUG=sample-express:*
+      
+      # Required so that the dev dependencies are used.
+      #- NODE_ENV=development
+  
+  #db:
+    #image: custom_psql  # Requires image to be previously compiled
+
+    #environment:
+      # According to the official documentation, postgres requires password
+      # https://hub.docker.com/_/postgres/
+      #- POSTGRES_PASSWORD=example
+      #- POSTGRES_USER=postgres
+      #- POSTGRES_DB=testDb
+    
+    #volumes: 
+    #  - /dbScripts:/docker-entrypoint-initdb.d/dbScripts
+
+    # Required so that services which depend on this one do not error out.  
+    #healthcheck:
+      # More on pg_isready:
+      # https://www.postgresql.org/docs/current/app-pg-isready.html
+    #test: pg_isready -U postgres

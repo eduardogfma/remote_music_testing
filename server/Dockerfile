@@ -2,7 +2,7 @@
 # Author: Eduardo A.
 # Date: 17/10/2020
 
-FROM node:12-slim
+FROM node
 
 # ARG 
 # Contrary to ENV, which defines a variable to be passed at run-time, 
@@ -26,4 +26,4 @@ ENV PATH /node/node_modules/.bin/:$PATH
 
 COPY . .
 
-CMD ["node", "/node/app/server/index.js"]
+CMD ["node", "/node/app/index.js"]
